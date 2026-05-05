@@ -33,6 +33,25 @@ Example `PROJECTS_JSON`:
 ]
 ```
 
+Topic-based example (shared command chat with separate project topics):
+
+```json
+[
+  {
+    "project_name": "KUZOV HUB",
+    "chat_scopes": [
+      { "chat_id": -1002960691411, "topic_ids": [2661] }
+    ]
+  },
+  {
+    "project_name": "GOOD Service",
+    "chat_scopes": [
+      { "chat_id": -1002960691411, "topic_ids": [2703] }
+    ]
+  }
+]
+```
+
 ## 2) Run modes
 
 ### Continuous mode (daily scheduler)
