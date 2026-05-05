@@ -17,9 +17,11 @@ class TelegramDataSource:
             settings.telegram_api_id,
             settings.telegram_api_hash,
         )
+        self._bot_token = settings.telegram_bot_token
 
     async def start(self) -> None:
-        await self._client.start()
+        # Cloud runtimes are non-interactive; use bot auth to avoid phone/code prompts.
+        await self._client.start(bot_token=self._bot_token)
 
     async def stop(self) -> None:
         await self._client.disconnect()

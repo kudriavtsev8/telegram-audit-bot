@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     lookback_hours: int = 24
 
     projects_json: str = "[]"
+    pm_identifiers_json: str = "[]"
 
     @field_validator("schedule_time")
     @classmethod
@@ -55,6 +56,18 @@ class Settings(BaseSettings):
         if not isinstance(raw, list):
             raise ValueError("PROJECTS_JSON must be a JSON array")
         return [ProjectConfig.model_validate(item) for item in raw]
+
+    @property
+    def pm_identifiers(self) -> List[str]:
+        raw = json.loads(self.pm_identifiers_json)
+        if not isinstance(raw, list):
+            raise ValueError("PM_IDENTIFIERS_JSON must be a JSON array")
+
+        normalized: List[str] = []
+        for item in raw:
+            if isinstance(item, str) and item.strip():
+                normalized.append(item.strip())
+        return normalized
 
 
 def get_settings() -> Settings:
