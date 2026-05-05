@@ -20,6 +20,7 @@ Fill `.env`:
 - `REPORT_TARGET_CHAT_ID` where daily report is sent
 - `OPENAI_API_KEY`
 - `PROJECTS_JSON` with chats to analyze
+- `PM_IDENTIFIERS_JSON` to explicitly mark PM user(s) for scoring
 
 Example `PROJECTS_JSON`:
 
@@ -32,15 +33,7 @@ Example `PROJECTS_JSON`:
 ]
 ```
 
-## 2) First login for Telethon
-
-First run will ask for your Telegram phone and login code to create session file.
-
-```bash
-python -m telegram_audit_bot
-```
-
-## 3) Run modes
+## 2) Run modes
 
 ### Continuous mode (daily scheduler)
 
@@ -54,11 +47,11 @@ python -m telegram_audit_bot
 python run_once.py
 ```
 
-## 4) Deploy
+## 3) Deploy
 
 Use any VM/VPS and run the continuous mode under `systemd`/`supervisor`/Docker.
 
-## 5) GitHub
+## 4) GitHub
 
 Initialize git and push:
 
@@ -76,3 +69,4 @@ git push -u origin main
 - Ensure participants are informed that communication is being analyzed.
 - Keep data access restricted to agency managers.
 - Tune prompt/rules in `src/telegram_audit_bot/analyzer.py` for your standards.
+- For best PM scoring quality, fill `PM_IDENTIFIERS_JSON` (username/full name).
