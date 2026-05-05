@@ -11,3 +11,9 @@ class ChatMessage:
     sender_name: str
     sent_at: datetime
     text: str
+
+
+@dataclass(slots=True)
+class ChatTarget:
+    chat_id: int
+    topic_ids: list[int]

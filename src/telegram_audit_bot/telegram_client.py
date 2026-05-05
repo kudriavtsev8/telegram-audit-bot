@@ -7,7 +7,7 @@ from telethon import TelegramClient
 from telethon.tl.custom.message import Message
 
 from .config import Settings
-from .types import ChatMessage
+from .types import ChatMessage, ChatTarget
 
 
 class TelegramDataSource:
@@ -26,12 +26,13 @@ class TelegramDataSource:
     async def stop(self) -> None:
         await self._client.disconnect()
 
-    async def fetch_messages_since(self, chat_ids: Iterable[int], since_utc: datetime) -> List[ChatMessage]:
+    async def fetch_messages_since(self, chat_targets: Iterable[ChatTarget], since_utc: datetime) -> List[ChatMessage]:
         if since_utc.tzinfo is None:
             since_utc = since_utc.replace(tzinfo=timezone.utc)
 
         results: List[ChatMessage] = []
-        for chat_id in chat_ids:
+        for target in chat_targets:
+            chat_id = target.chat_id
             entity = await self._client.get_entity(chat_id)
             title = getattr(entity, "title", str(chat_id))
 
@@ -41,6 +42,8 @@ class TelegramDataSource:
                 if not msg.date or msg.date < since_utc:
                     continue
                 if not msg.message:
+                    continue
+                if target.topic_ids and not _message_in_topics(msg, target.topic_ids):
                     continue
 
                 sender = await msg.get_sender()
@@ -93,3 +96,20 @@ def _sender_name(sender: object) -> str:
     if username:
         return f"@{username}"
     return "Unknown"
+
+
+def _message_in_topics(msg: Message, topic_ids: List[int]) -> bool:
+    if msg.id in topic_ids:
+        return True
+
+    reply_to = getattr(msg, "reply_to", None)
+    if reply_to is None:
+        return False
+
+    reply_to_top_id = getattr(reply_to, "reply_to_top_id", None)
+    if reply_to_top_id in topic_ids:
+        return True
+
+    # Fallback for cases where thread linkage comes as reply_to_msg_id.
+    reply_to_msg_id = getattr(reply_to, "reply_to_msg_id", None)
+    return reply_to_msg_id in topic_ids

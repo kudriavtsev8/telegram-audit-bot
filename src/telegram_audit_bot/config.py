@@ -3,13 +3,39 @@ from __future__ import annotations
 import json
 from typing import List
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from .types import ChatTarget
+
+
+class ChatScopeConfig(BaseModel):
+    chat_id: int
+    topic_ids: List[int] = Field(default_factory=list)
 
 
 class ProjectConfig(BaseModel):
     project_name: str
-    chat_ids: List[int] = Field(min_length=1)
+    chat_ids: List[int] = Field(default_factory=list)
+    chat_scopes: List[ChatScopeConfig] = Field(default_factory=list)
+
+    @property
+    def chat_targets(self) -> List[ChatTarget]:
+        targets: List[ChatTarget] = []
+        if self.chat_scopes:
+            for scope in self.chat_scopes:
+                targets.append(ChatTarget(chat_id=scope.chat_id, topic_ids=scope.topic_ids))
+            return targets
+
+        for chat_id in self.chat_ids:
+            targets.append(ChatTarget(chat_id=chat_id, topic_ids=[]))
+        return targets
+
+    @model_validator(mode="after")
+    def validate_any_chat_source(self) -> "ProjectConfig":
+        if not self.chat_ids and not self.chat_scopes:
+            raise ValueError("Project requires chat_ids or chat_scopes")
+        return self
 
 
 class Settings(BaseSettings):

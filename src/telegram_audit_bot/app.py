@@ -54,7 +54,7 @@ class AuditApp:
 
         for project in self.settings.projects:
             try:
-                messages = await self.data_source.fetch_messages_since(project.chat_ids, since_utc)
+                messages = await self.data_source.fetch_messages_since(project.chat_targets, since_utc)
                 report_text = self.analyzer.build_report(
                     project_name=project.project_name,
                     started_at=since_utc,
